@@ -27,9 +27,6 @@ importers:
 
   apps/web:
     dependencies:
-      '@clawe/shared':
-        specifier: workspace:*
-        version: link:../../packages/shared
       '@clawe/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -154,21 +151,6 @@ importers:
       typescript-eslint:
         specifier: ^8.50.0
         version: 8.50.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.2)
-
-  packages/shared:
-    devDependencies:
-      '@clawe/eslint-config':
-        specifier: workspace:*
-        version: link:../eslint-config
-      '@clawe/typescript-config':
-        specifier: workspace:*
-        version: link:../typescript-config
-      eslint:
-        specifier: ^9.39.1
-        version: 9.39.1(jiti@2.6.1)
-      typescript:
-        specifier: 5.9.2
-        version: 5.9.2
 
   packages/typescript-config: {}
 
