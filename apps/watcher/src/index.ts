@@ -33,7 +33,7 @@ const AGENTS = [
     name: "Clawe",
     emoji: "🦞",
     role: "Squad Lead",
-    cron: "0 * * * *",
+    cron: "0,15,30,45 * * * *",
   },
   {
     id: "inky",
@@ -197,6 +197,7 @@ async function setupCrons(): Promise<void> {
         model: "anthropic/claude-sonnet-4-20250514",
         timeoutSeconds: 600,
       },
+      delivery: { mode: "none" },
     };
 
     const addResult = await cronAdd(job);

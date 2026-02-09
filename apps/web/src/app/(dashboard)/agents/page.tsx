@@ -14,20 +14,15 @@ import {
   CardTitle,
 } from "@clawe/ui/components/card";
 import { Badge } from "@clawe/ui/components/badge";
-
-type AgentStatus = "idle" | "active" | "blocked";
+import { deriveStatus, type AgentStatus } from "@clawe/shared/agents";
 
 const statusColors: Record<AgentStatus, string> = {
-  idle: "bg-gray-500",
-  active: "bg-green-500",
-  blocked: "bg-red-500",
+  offline: "bg-gray-500",
+  online: "bg-green-500",
 };
 
-function getStatusColor(status: string): string {
-  if (status === "idle" || status === "active" || status === "blocked") {
-    return statusColors[status];
-  }
-  return statusColors.idle;
+function getStatusColor(status: AgentStatus): string {
+  return statusColors[status];
 }
 
 const AgentsPage = () => {
@@ -69,9 +64,9 @@ const AgentsPage = () => {
                         className="flex items-center gap-1.5"
                       >
                         <span
-                          className={`h-2 w-2 rounded-full ${getStatusColor(agent.status)}`}
+                          className={`h-2 w-2 rounded-full ${getStatusColor(deriveStatus(agent))}`}
                         />
-                        {agent.status || "idle"}
+                        {deriveStatus(agent)}
                       </Badge>
                     </div>
                     {agent.currentTask && (

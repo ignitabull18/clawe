@@ -23,14 +23,14 @@ describe("squad", () => {
     expect(console.log).toHaveBeenCalledWith("🤖 Squad Status:\n");
   });
 
-  it("displays agent details with active status", async () => {
+  it("displays agent details with online status", async () => {
     vi.mocked(client.query).mockResolvedValue([
       {
         _id: "agent-1",
         name: "Clawe",
         emoji: "🦞",
         role: "Squad Lead",
-        status: "active",
+        status: "online",
         sessionKey: "agent:main:main",
         currentTask: { title: "Coordinate tasks" },
         lastHeartbeat: Date.now(),
@@ -40,40 +40,41 @@ describe("squad", () => {
     await squad();
 
     expect(console.log).toHaveBeenCalledWith("🦞 Clawe (Squad Lead)");
-    expect(console.log).toHaveBeenCalledWith("   Status: 🟢 active");
+    expect(console.log).toHaveBeenCalledWith("   Status: 🟢 online");
     expect(console.log).toHaveBeenCalledWith("   Session: agent:main:main");
     expect(console.log).toHaveBeenCalledWith("   Working on: Coordinate tasks");
   });
 
-  it("displays idle status icon", async () => {
+  it("displays offline status when no heartbeat", async () => {
     vi.mocked(client.query).mockResolvedValue([
       {
         _id: "agent-2",
         name: "Inky",
         role: "Writer",
-        status: "idle",
+        status: "offline",
         sessionKey: "agent:inky:main",
       },
     ]);
 
     await squad();
 
-    expect(console.log).toHaveBeenCalledWith("   Status: ⚪ idle");
+    expect(console.log).toHaveBeenCalledWith("   Status: 🔴 offline");
   });
 
-  it("displays blocked status icon", async () => {
+  it("displays offline status when heartbeat is stale", async () => {
     vi.mocked(client.query).mockResolvedValue([
       {
         _id: "agent-3",
         name: "Pixel",
         role: "Designer",
-        status: "blocked",
+        status: "online",
         sessionKey: "agent:pixel:main",
+        lastHeartbeat: Date.now() - 25 * 60 * 1000, // 25 min ago (stale)
       },
     ]);
 
     await squad();
 
-    expect(console.log).toHaveBeenCalledWith("   Status: 🔴 blocked");
+    expect(console.log).toHaveBeenCalledWith("   Status: 🔴 offline");
   });
 });
