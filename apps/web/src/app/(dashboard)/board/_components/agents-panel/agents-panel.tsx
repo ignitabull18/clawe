@@ -5,6 +5,7 @@ import { useQuery } from "convex/react";
 import { api } from "@clawe/backend";
 import { cn } from "@clawe/ui/lib/utils";
 import { Loader2 } from "lucide-react";
+import { deriveStatus } from "@clawe/shared/agents";
 import { AgentsPanelHeader } from "./agents-panel-header";
 import { AgentsPanelList } from "./agents-panel-list";
 
@@ -27,7 +28,7 @@ export const AgentsPanel = ({
     if (!agents) return { total: 0, active: 0 };
     return {
       total: agents.length,
-      active: agents.filter((a) => a.status === "active").length,
+      active: agents.filter((a) => deriveStatus(a) === "online").length,
     };
   }, [agents]);
 

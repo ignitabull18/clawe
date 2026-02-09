@@ -1,5 +1,6 @@
 import { client } from "../client.js";
 import { api } from "@clawe/backend";
+import { deriveStatus } from "@clawe/shared/agents";
 
 export async function squad(): Promise<void> {
   const agents = await client.query(api.agents.squad, {});
@@ -7,9 +8,8 @@ export async function squad(): Promise<void> {
   console.log("🤖 Squad Status:\n");
   for (const agent of agents) {
     const emoji = agent.emoji ?? "🤖";
-    const status = agent.status ?? "unknown";
-    const statusIcon =
-      status === "active" ? "🟢" : status === "idle" ? "⚪" : "🔴";
+    const status = deriveStatus(agent);
+    const statusIcon = status === "online" ? "🟢" : "🔴";
 
     console.log(`${emoji} ${agent.name} (${agent.role})`);
     console.log(`   Status: ${statusIcon} ${status}`);

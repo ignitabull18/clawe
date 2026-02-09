@@ -7,6 +7,10 @@
     "./openclaw": {
       "types": "./src/openclaw/index.ts",
       "default": "./src/openclaw/index.ts"
+    },
+    "./agents": {
+      "types": "./src/agents/index.ts",
+      "default": "./src/agents/index.ts"
     }
   },
   "scripts": {

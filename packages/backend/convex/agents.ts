@@ -1,6 +1,8 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
+const agentStatusValidator = v.union(v.literal("online"), v.literal("offline"));
+
 // List all agents
 export const list = query({
   args: {},
@@ -30,13 +32,7 @@ export const getBySessionKey = query({
 
 // List agents by status
 export const listByStatus = query({
-  args: {
-    status: v.union(
-      v.literal("idle"),
-      v.literal("active"),
-      v.literal("blocked"),
-    ),
-  },
+  args: { status: agentStatusValidator },
   handler: async (ctx, args) => {
     return await ctx.db
       .query("agents")
@@ -84,14 +80,12 @@ export const upsert = mutation({
   handler: async (ctx, args) => {
     const now = Date.now();
 
-    // Check if agent exists
     const existing = await ctx.db
       .query("agents")
       .withIndex("by_sessionKey", (q) => q.eq("sessionKey", args.sessionKey))
       .first();
 
     if (existing) {
-      // Update existing
       await ctx.db.patch(existing._id, {
         name: args.name,
         role: args.role,
@@ -101,14 +95,13 @@ export const upsert = mutation({
       });
       return existing._id;
     } else {
-      // Create new
       return await ctx.db.insert("agents", {
         name: args.name,
         role: args.role,
         sessionKey: args.sessionKey,
         emoji: args.emoji,
         config: args.config,
-        status: "idle",
+        status: "offline",
         createdAt: now,
         updatedAt: now,
       });
@@ -133,7 +126,7 @@ export const create = mutation({
       sessionKey: args.sessionKey,
       emoji: args.emoji,
       config: args.config,
-      status: "idle",
+      status: "offline",
       createdAt: now,
       updatedAt: now,
     });
@@ -144,11 +137,7 @@ export const create = mutation({
 export const updateStatus = mutation({
   args: {
     id: v.id("agents"),
-    status: v.union(
-      v.literal("idle"),
-      v.literal("active"),
-      v.literal("blocked"),
-    ),
+    status: agentStatusValidator,
   },
   handler: async (ctx, args) => {
     await ctx.db.patch(args.id, {
@@ -173,19 +162,17 @@ export const heartbeat = mutation({
       throw new Error(`Agent not found: ${args.sessionKey}`);
     }
 
-    // Only log activity if agent was offline (no heartbeat in last 5 minutes)
-    const ONLINE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
+    const ONLINE_THRESHOLD_MS = 20 * 60 * 1000; // 20 minutes
     const wasOffline =
       !agent.lastHeartbeat || now - agent.lastHeartbeat > ONLINE_THRESHOLD_MS;
 
     await ctx.db.patch(agent._id, {
       lastHeartbeat: now,
       lastSeen: now,
-      presenceStatus: "online",
+      status: "online",
       updatedAt: now,
     });
 
-    // Only log heartbeat activity when agent comes online (not every heartbeat)
     if (wasOffline) {
       await ctx.db.insert("activities", {
         type: "agent_heartbeat",
@@ -217,7 +204,6 @@ export const setCurrentTask = mutation({
 
     await ctx.db.patch(agent._id, {
       currentTaskId: args.taskId,
-      status: args.taskId ? "active" : "idle",
       updatedAt: Date.now(),
     });
   },

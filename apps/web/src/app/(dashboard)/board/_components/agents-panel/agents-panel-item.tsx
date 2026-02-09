@@ -7,30 +7,23 @@ import {
   TooltipTrigger,
 } from "@clawe/ui/components/tooltip";
 import type { Agent } from "@clawe/backend/types";
-
-type AgentStatus = "idle" | "active" | "blocked";
+import { deriveStatus, type AgentStatus } from "@clawe/shared/agents";
 
 const statusConfig: Record<
   AgentStatus,
   { dotColor: string; bgColor: string; textColor: string; text: string }
 > = {
-  active: {
+  online: {
     dotColor: "bg-emerald-500",
     bgColor: "bg-emerald-50 dark:bg-emerald-950/50",
     textColor: "text-emerald-600 dark:text-emerald-400",
     text: "Working",
   },
-  idle: {
+  offline: {
     dotColor: "bg-gray-400",
     bgColor: "bg-gray-100 dark:bg-gray-800/50",
     textColor: "text-gray-500 dark:text-gray-400",
-    text: "Idle",
-  },
-  blocked: {
-    dotColor: "bg-amber-500",
-    bgColor: "bg-amber-50 dark:bg-amber-950/50",
-    textColor: "text-amber-600 dark:text-amber-400",
-    text: "Blocked",
+    text: "Offline",
   },
 };
 
@@ -81,7 +74,7 @@ export const AgentsPanelItem = ({
   selected = false,
   onToggle,
 }: AgentsPanelItemProps) => {
-  const status = (agent.status as AgentStatus) || "idle";
+  const status = deriveStatus(agent);
   const { dotColor, bgColor, textColor, text } = statusConfig[status];
   const avatarColor = getAvatarColor(agent.name);
 
@@ -172,7 +165,7 @@ export const AgentsPanelItem = ({
         </TooltipTrigger>
         <TooltipContent side="top" sideOffset={4}>
           <p className="text-xs">
-            {status === "active"
+            {status === "online"
               ? "Active now"
               : `Last active: ${formatRelativeTime(agent.lastSeen)}`}
           </p>

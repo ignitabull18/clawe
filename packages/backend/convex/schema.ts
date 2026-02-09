@@ -8,17 +8,9 @@ export default defineSchema({
     role: v.string(), // "Squad Lead", "Content Writer", etc.
     emoji: v.optional(v.string()), // "🦞", "✍️", etc.
     sessionKey: v.string(), // "agent:main:main" - OpenClaw session key
-    status: v.union(
-      v.literal("idle"),
-      v.literal("active"),
-      v.literal("blocked"),
-    ),
+    status: v.union(v.literal("online"), v.literal("offline")),
     currentTaskId: v.optional(v.id("tasks")),
     config: v.optional(v.any()), // Agent-specific configuration
-    // Presence tracking
-    presenceStatus: v.optional(
-      v.union(v.literal("online"), v.literal("idle"), v.literal("offline")),
-    ),
     lastHeartbeat: v.optional(v.number()),
     lastSeen: v.optional(v.number()),
     currentActivity: v.optional(v.string()),
@@ -27,7 +19,6 @@ export default defineSchema({
   })
     .index("by_sessionKey", ["sessionKey"])
     .index("by_status", ["status"])
-    .index("by_presence", ["presenceStatus"])
     .index("by_lastSeen", ["lastSeen"]),
 
   // Tasks - Mission queue with full workflow support

@@ -5,6 +5,7 @@ services:
     volumes:
       - ./.openclaw:/data
       - ./.openclaw/logs:/tmp/openclaw
+      - .:/home/ubuntu/clawe
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:

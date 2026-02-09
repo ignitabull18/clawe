@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@clawe/backend": "workspace:*",
+    "@clawe/shared": "workspace:*",
     "convex": "^1.21.0"
   },
   "devDependencies": {
