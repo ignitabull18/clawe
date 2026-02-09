@@ -169,7 +169,7 @@ export const TaskDetailModal = ({
                     <div className="flex gap-3">
                       <Button
                         variant="outline"
-                        className="border-emerald-200 hover:bg-emerald-50 hover:border-emerald-300 dark:border-emerald-800 dark:hover:bg-emerald-950/50 flex-1"
+                        className="flex-1 border-emerald-200 hover:border-emerald-300 hover:bg-emerald-50 dark:border-emerald-800 dark:hover:bg-emerald-950/50"
                         onClick={handleApprove}
                         disabled={isSubmitting}
                       >
@@ -178,7 +178,7 @@ export const TaskDetailModal = ({
                       </Button>
                       <Button
                         variant="outline"
-                        className="border-amber-200 hover:bg-amber-50 hover:border-amber-300 dark:border-amber-800 dark:hover:bg-amber-950/50 flex-1"
+                        className="flex-1 border-amber-200 hover:border-amber-300 hover:bg-amber-50 dark:border-amber-800 dark:hover:bg-amber-950/50"
                         onClick={() => setShowFeedback(true)}
                         disabled={isSubmitting}
                       >
@@ -199,7 +199,7 @@ export const TaskDetailModal = ({
                       className="mb-3 min-h-[80px] resize-none"
                       autoFocus
                     />
-                    <div className="flex gap-2 justify-end">
+                    <div className="flex justify-end gap-2">
                       <Button
                         variant="ghost"
                         size="sm"
