@@ -40,4 +40,4 @@ COPY --from=builder /app/packages/backend/package.json ./node_modules/@clawe/bac
 
 ENV NODE_ENV=production
 
-CMD ["node", "dist/index.js"]
+CMD ["node", "--experimental-specifier-resolution=node", "dist/index.js"]
