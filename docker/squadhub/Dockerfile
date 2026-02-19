@@ -1,3 +1,25 @@
+FROM node:22-slim AS builder
+RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
+WORKDIR /app
+
+# Copy package manifests for dependency installation
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY packages/cli/package.json ./packages/cli/
+COPY packages/squadhub-extensions/package.json ./packages/squadhub-extensions/
+COPY packages/shared/package.json ./packages/shared/
+COPY packages/backend/package.json ./packages/backend/
+COPY packages/typescript-config/package.json ./packages/typescript-config/
+RUN pnpm install --frozen-lockfile
+
+# Copy source and build CLI + extensions
+COPY packages/cli/ ./packages/cli/
+COPY packages/squadhub-extensions/ ./packages/squadhub-extensions/
+COPY packages/shared/ ./packages/shared/
+COPY packages/backend/ ./packages/backend/
+COPY packages/typescript-config/ ./packages/typescript-config/
+RUN pnpm build --filter=@clawe/cli --filter=@clawe/squadhub-extensions
+
+# Runtime
 FROM node:22-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -20,12 +42,12 @@ COPY docker/squadhub/templates/ /opt/clawe/templates/
 COPY docker/squadhub/scripts/ /opt/clawe/scripts/
 RUN chmod +x /opt/clawe/scripts/*.sh
 
-# Copy bundled CLI (single file with all deps included)
-COPY packages/cli/dist/clawe.js /usr/local/bin/clawe
+# Copy built CLI (single bundled file)
+COPY --from=builder /app/packages/cli/dist/clawe.js /usr/local/bin/clawe
 RUN chmod +x /usr/local/bin/clawe
 
-# Copy Clawe OpenClaw extensions (plugin bundle + manifest)
-COPY packages/squadhub-extensions/dist/index.js /opt/clawe/extensions/clawe/dist/index.js
+# Copy built OpenClaw extensions (plugin bundle + manifest)
+COPY --from=builder /app/packages/squadhub-extensions/dist/index.js /opt/clawe/extensions/clawe/dist/index.js
 COPY packages/squadhub-extensions/openclaw.plugin.json /opt/clawe/extensions/clawe/openclaw.plugin.json
 COPY packages/squadhub-extensions/package.json /opt/clawe/extensions/clawe/package.json
 
