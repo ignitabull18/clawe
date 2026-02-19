@@ -18,7 +18,7 @@ COPY --from=deps /app/apps/watcher/node_modules ./apps/watcher/node_modules
 COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules
 COPY --from=deps /app/packages/backend/node_modules ./packages/backend/node_modules
 COPY . .
-RUN pnpm build --filter=@clawe/watcher
+RUN pnpm --filter @clawe/shared run build && pnpm --filter @clawe/watcher run build
 
 # Runner
 FROM node:22-slim

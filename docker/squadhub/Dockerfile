@@ -17,7 +17,7 @@ COPY packages/squadhub-extensions/ ./packages/squadhub-extensions/
 COPY packages/shared/ ./packages/shared/
 COPY packages/backend/ ./packages/backend/
 COPY packages/typescript-config/ ./packages/typescript-config/
-RUN pnpm build --filter=@clawe/cli --filter=@clawe/squadhub-extensions
+RUN pnpm --filter @clawe/cli run build && pnpm --filter @clawe/squadhub-extensions run build
 
 # Runtime
 FROM node:22-slim

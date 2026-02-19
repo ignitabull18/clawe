@@ -24,7 +24,7 @@ COPY . .
 
 ARG NEXT_PUBLIC_CONVEX_URL
 ENV NEXT_PUBLIC_CONVEX_URL=$NEXT_PUBLIC_CONVEX_URL
-RUN pnpm build --filter=web
+RUN pnpm --filter @clawe/shared run build && pnpm --filter web run build
 
 # Production runner
 FROM base AS runner
