@@ -11,6 +11,7 @@ COPY packages/backend/package.json ./packages/backend/
 COPY packages/shared/package.json ./packages/shared/
 COPY packages/typescript-config/package.json ./packages/typescript-config/
 COPY packages/eslint-config/package.json ./packages/eslint-config/
+ENV NODE_ENV=development
 RUN pnpm install --frozen-lockfile
 
 # Build the app

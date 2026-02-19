@@ -9,6 +9,7 @@ COPY apps/watcher/package.json ./apps/watcher/
 COPY packages/shared/package.json ./packages/shared/
 COPY packages/backend/package.json ./packages/backend/
 COPY packages/typescript-config/package.json ./packages/typescript-config/
+ENV NODE_ENV=development
 RUN pnpm install --frozen-lockfile
 
 # Build
