@@ -26,14 +26,17 @@ FROM node:22-slim
 WORKDIR /app
 
 COPY --from=builder /app/apps/watcher/dist/ ./dist/
+
+# Install runtime deps first, then overlay workspace packages
+# (npm install would prune manually-copied packages if run after)
+RUN echo '{"name":"@clawe/watcher","private":true,"type":"module"}' > package.json
+RUN npm install convex axios ws moment-timezone --omit=dev
+
 COPY --from=builder /app/packages/shared/dist/ ./node_modules/@clawe/shared/dist/
 COPY --from=builder /app/packages/shared/package.json ./node_modules/@clawe/shared/package.json
 COPY --from=builder /app/packages/backend/convex/_generated/ ./node_modules/@clawe/backend/convex/_generated/
 COPY --from=builder /app/packages/backend/convex/*.ts ./node_modules/@clawe/backend/convex/
 COPY --from=builder /app/packages/backend/package.json ./node_modules/@clawe/backend/package.json
-
-RUN echo '{"name":"@clawe/watcher","private":true,"type":"module"}' > package.json
-RUN npm install convex axios ws moment-timezone --omit=dev
 
 ENV NODE_ENV=production
 
