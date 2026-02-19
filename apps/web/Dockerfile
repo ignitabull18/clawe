@@ -10,6 +10,7 @@ COPY packages/ui/package.json ./packages/ui/
 COPY packages/backend/package.json ./packages/backend/
 COPY packages/shared/package.json ./packages/shared/
 COPY packages/typescript-config/package.json ./packages/typescript-config/
+COPY packages/plugins/package.json ./packages/plugins/
 COPY packages/eslint-config/package.json ./packages/eslint-config/
 ENV NODE_ENV=development
 RUN pnpm install --frozen-lockfile
@@ -21,11 +22,12 @@ COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
 COPY --from=deps /app/packages/ui/node_modules ./packages/ui/node_modules
 COPY --from=deps /app/packages/backend/node_modules ./packages/backend/node_modules
 COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules
+COPY --from=deps /app/packages/plugins/node_modules ./packages/plugins/node_modules
 COPY . .
 
 ARG NEXT_PUBLIC_CONVEX_URL
 ENV NEXT_PUBLIC_CONVEX_URL=$NEXT_PUBLIC_CONVEX_URL
-RUN pnpm --filter @clawe/shared run build && pnpm --filter web run build
+RUN pnpm --filter @clawe/shared run build && pnpm --filter @clawe/plugins run build && pnpm --filter web run build
 
 # Production runner
 FROM base AS runner
