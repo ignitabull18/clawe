@@ -23,10 +23,14 @@ import { setupTenant } from "@/lib/squadhub/setup";
  * 6. Return { ok: true, tenantId }
  */
 export const POST = async (request: NextRequest) => {
-  const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
+  const convexUrl =
+    process.env.CONVEX_URL ?? process.env.NEXT_PUBLIC_CONVEX_URL;
   if (!convexUrl) {
     return NextResponse.json(
-      { error: "NEXT_PUBLIC_CONVEX_URL not configured" },
+      {
+        error:
+          "Convex URL not configured. Set CONVEX_URL or NEXT_PUBLIC_CONVEX_URL in .env (e.g. http://127.0.0.1:3210 for local, or your Coolify backend URL).",
+      },
       { status: 500 },
     );
   }
@@ -129,7 +133,19 @@ export const POST = async (request: NextRequest) => {
       errors: result.errors.length > 0 ? result.errors : undefined,
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    const message =
+      error instanceof Error ? error.message : "Unknown error";
+    const hint =
+      message.includes("fetch") ||
+      message.includes("ECONNREFUSED") ||
+      message.includes("network")
+        ? " Is your Convex backend running and reachable at " +
+          (process.env.CONVEX_URL ?? process.env.NEXT_PUBLIC_CONVEX_URL ?? "CONVEX_URL") +
+          "?"
+        : "";
+    return NextResponse.json(
+      { error: message + hint },
+      { status: 500 },
+    );
   }
 };

@@ -78,9 +78,22 @@ export default function ProvisioningPage() {
     try {
       await apiClient.post("/api/tenant/provision");
       // Convex subscription will reactively update `tenant` → redirect fires
-    } catch (err) {
+    } catch (err: unknown) {
       const message =
-        err instanceof Error ? err.message : "An unexpected error occurred";
+        (err &&
+          typeof err === "object" &&
+          "response" in err &&
+          err.response &&
+          typeof err.response === "object" &&
+          "data" in err.response &&
+          err.response.data &&
+          typeof err.response.data === "object" &&
+          "error" in err.response.data &&
+          typeof (err.response.data as { error: unknown }).error === "string")
+          ? (err.response.data as { error: string }).error
+          : err instanceof Error
+            ? err.message
+            : "An unexpected error occurred";
       setError(message);
       provisioningRef.current = false;
     }

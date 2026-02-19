@@ -245,6 +245,60 @@ const AGENTS = [
 
 ## Development
 
+### First-time setup
+
+1. **Create `.env`** (if missing): `cp .env.example .env`  
+   - Set `ANTHROPIC_API_KEY` (required for AI).  
+   - For local Convex dev, `CONVEX_URL` and `NEXT_PUBLIC_CONVEX_URL` are set to `http://127.0.0.1:3210` in the generated `.env`; leave as-is or replace with a cloud deployment URL.
+
+2. **Build shared packages** so the CLI and Convex can resolve workspace deps:
+   ```bash
+   pnpm --filter @clawe/shared build
+   pnpm --filter @clawe/cli build
+   ```
+
+3. **Convex (local dev)**  
+   The first time you run `pnpm dev`, Convex may prompt to configure a project. In an interactive terminal you can run:
+   ```bash
+   pnpm convex:dev
+   ```
+   and choose "new" project and "local" deployment. The repo is already set up to use a local deployment at `http://127.0.0.1:3210`. The sync script will set `NEXTAUTH_ISSUER_URL` and `NEXTAUTH_JWKS_URL` once the backend is up; if "Preparing" fails the first time, run `pnpm dev` again.
+
+### Using self-hosted Convex
+
+You can run your own Convex backend (e.g. [convex-backend](https://github.com/get-convex/convex-backend) Docker setup) and point Clawe at it.
+
+1. **Run your Convex backend** (see the [self-hosting guide](https://github.com/get-convex/convex-backend/blob/main/self-hosted/README.md)). Generate an admin key on the backend, e.g.:
+   ```bash
+   docker compose exec backend ./generate_admin_key.sh
+   ```
+
+2. **Configure `.env`** with the same URL for the app and the CLI:
+   ```bash
+   CONVEX_URL=https://convex.yourdomain.com
+   NEXT_PUBLIC_CONVEX_URL=https://convex.yourdomain.com
+   CONVEX_SELF_HOSTED_URL=https://convex.yourdomain.com
+   CONVEX_SELF_HOSTED_ADMIN_KEY=<your-admin-key>
+   ```
+   Use `http://host:3210` if your backend is on the default port and not behind HTTPS.
+
+3. **Deploy functions and set auth env vars** (from repo root with `.env` loaded):
+   ```bash
+   pnpm convex:deploy
+   ```
+   This pushes your Convex functions and sets `NEXTAUTH_ISSUER_URL`, `NEXTAUTH_JWKS_URL`, and `WATCHER_TOKEN` on your self-hosted deployment.
+
+4. **Start the app** (your Convex backend is already running separately). Run the web app and optionally the watcher; do not use `pnpm dev` for the backend (that starts Convex Cloud dev). From the repo root:
+   ```bash
+   pnpm dev:web
+   ```
+   In another terminal, to run the watcher (notifications, crons) against your self-hosted Convex:
+   ```bash
+   pnpm --filter @clawe/watcher dev
+   ```
+
+### Running the app
+
 ```bash
 # Install dependencies
 pnpm install
@@ -279,11 +333,64 @@ pnpm fix        # Auto-fix
 pnpm convex:deploy
 ```
 
+### Using 1Password for credentials
+
+You can keep secrets in [1Password](https://1password.com) and have the CLI inject them at runtime so they never live in `.env`.
+
+1. **Install 1Password CLI** ([get started](https://developer.1password.com/docs/cli/get-started/)).
+
+2. **Store secrets in 1Password**  
+   Create an item (e.g. "Clawe" in vault "Private") with fields such as:
+   - `ANTHROPIC_API_KEY`
+   - `CONVEX_SELF_HOSTED_ADMIN_KEY` (if using self-hosted Convex)
+   - Optionally: `SQUADHUB_TOKEN`, `OPENAI_API_KEY`, `NEXTAUTH_SECRET`
+
+3. **Create `.env.op` from the template**  
+   Copy `.env.op.template` to `.env.op` and replace the placeholder secret references with your vault/item/field paths (e.g. `op://Private/Clawe/ANTHROPIC_API_KEY`). See [secret reference syntax](https://developer.1password.com/docs/cli/secret-reference-syntax/).
+
+4. **Run commands with 1Password**  
+   Use the `:op` scripts so secrets are loaded from 1Password and merged with your `.env`:
+   ```bash
+   pnpm dev:op           # Full dev stack with secrets from 1Password
+   pnpm dev:web:op       # Web only with 1Password
+   pnpm convex:deploy:op # Deploy Convex (e.g. self-hosted) with 1Password
+   ```
+   If `.env.op` is missing, the non-`:op` scripts (e.g. `pnpm dev`) still work with `.env` only.
+
+### Deploy to Coolify 2
+
+Deploy the app to **Coolify 2** (self-hosted). Not Coolify 1. Not CapRover/capicoolify.
+
+1. **In Coolify 2:** Create an application linked to this repo (e.g. GitHub source). Set build context to repo root and Dockerfile path to `apps/web/Dockerfile` for the web app. Note the **resource UUID** (from the app’s URL or **Resources** in the UI).
+
+2. **Create an API token** in Coolify: **Keys & Tokens** → **API tokens**.
+
+3. **Store in 1Password** (recommended): Add a item (e.g. "Clawe" or "Coolify 2") with:
+   - `COOLIFY_URL` — your Coolify 2 base URL (e.g. `https://coolify.example.com`; if the API is under `/api/v1`, use `https://coolify.example.com/api/v1`)
+   - `COOLIFY_API_TOKEN` — token from step 2
+   - `COOLIFY_RESOURCE_UUID` — the application resource UUID from step 1
+
+4. **Add to `.env.op`** (as 1Password secret references), e.g.:
+   ```bash
+   COOLIFY_URL=op://Private/Coolify2/COOLIFY_URL
+   COOLIFY_API_TOKEN=op://Private/Coolify2/COOLIFY_API_TOKEN
+   COOLIFY_RESOURCE_UUID=op://Private/Coolify2/COOLIFY_RESOURCE_UUID
+   ```
+
+5. **Deploy:**
+   ```bash
+   pnpm deploy:coolify:op
+   ```
+   Or with credentials in `.env`: `pnpm deploy:coolify`. Optional: `COOLIFY_FORCE=1` to force rebuild without cache.
+
 ## Environment Variables
 
-| Variable            | Required | Description                       |
-| ------------------- | -------- | --------------------------------- |
-| `ANTHROPIC_API_KEY` | Yes      | Anthropic API key for Claude      |
-| `SQUADHUB_TOKEN`    | Yes      | Auth token for squadhub gateway   |
-| `CONVEX_URL`        | Yes      | Convex deployment URL             |
-| `OPENAI_API_KEY`    | No       | OpenAI key (for image generation) |
+| Variable                         | Required | Description                                                |
+| -------------------------------- | -------- | ---------------------------------------------------------- |
+| `ANTHROPIC_API_KEY`              | Yes      | Anthropic API key for Claude                               |
+| `SQUADHUB_TOKEN`                 | Yes      | Auth token for squadhub gateway                            |
+| `CONVEX_URL`                     | Yes      | Convex deployment URL (Cloud or self-hosted backend URL)   |
+| `NEXT_PUBLIC_CONVEX_URL`         | Yes      | Same as `CONVEX_URL` (exposed to browser; keep in sync)   |
+| `CONVEX_SELF_HOSTED_URL`         | No       | Self-hosted Convex backend URL (for CLI deploy/env set)  |
+| `CONVEX_SELF_HOSTED_ADMIN_KEY`   | No       | Admin key from self-hosted backend (for CLI)               |
+| `OPENAI_API_KEY`                 | No       | OpenAI key (for image generation)                         |

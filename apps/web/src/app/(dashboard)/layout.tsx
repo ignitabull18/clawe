@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { use, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { ScrollArea } from "@clawe/ui/components/scroll-area";
 import { SidebarInset, SidebarProvider } from "@clawe/ui/components/sidebar";
@@ -15,6 +15,8 @@ import { useRequireOnboarding } from "@/hooks/use-onboarding-guard";
 type DashboardLayoutProps = {
   children: React.ReactNode;
   header: React.ReactNode;
+  params?: Promise<Record<string, string | string[]>>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
 // Routes that handle their own scrolling (e.g., kanban board)
@@ -23,7 +25,19 @@ const isFullHeightRoute = (path: string) => path === "/board";
 // Routes that handle their own padding
 const isNoPaddingRoute = (path: string) => path === "/board";
 
-const DashboardLayout = ({ children, header }: DashboardLayoutProps) => {
+const emptyParamsPromise = Promise.resolve(
+  {} as Record<string, string | string[] | undefined>,
+);
+
+const DashboardLayout = ({
+  children,
+  header,
+  params,
+  searchParams,
+}: DashboardLayoutProps) => {
+  // Next.js 15+: unwrap Promise params/searchParams to avoid sync access warnings
+  use(params ?? emptyParamsPromise);
+  use(searchParams ?? emptyParamsPromise);
   const pathname = usePathname();
   const { isLoading } = useRequireOnboarding();
   const [sidebarOpen, setSidebarOpen] = useState(false);

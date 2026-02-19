@@ -17,7 +17,13 @@
     "check-types": "turbo run check-types",
     "check": "turbo run lint check-types && pnpm run format:check",
     "fix": "turbo run lint:fix && pnpm run format",
-    "test": "dotenv -e .env -- turbo run test"
+    "test": "dotenv -e .env -- turbo run test",
+    "dev:op": "./scripts/run-with-1password.sh pnpm exec turbo run dev",
+    "dev:web:op": "./scripts/run-with-1password.sh pnpm exec turbo run dev --filter=web",
+    "convex:deploy:op": "./scripts/run-with-1password.sh ./scripts/convex-deploy.sh",
+    "setup:google-oauth": "./scripts/setup-google-oauth.sh",
+    "deploy:coolify": "./scripts/deploy-coolify.sh",
+    "deploy:coolify:op": "./scripts/run-with-1password.sh ./scripts/deploy-coolify.sh"
   },
   "devDependencies": {
     "dotenv-cli": "^11.0.0",

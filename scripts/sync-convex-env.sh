@@ -1,11 +1,12 @@
 #!/bin/bash
-# Sync environment variables to the local Convex backend on dev startup.
+# Sync environment variables to the Convex backend on dev startup.
 # Called as a background process from the backend's dev script.
-# Waits for the local Convex backend to be ready, then sets env vars.
+# Waits for the backend to be ready, then sets env vars.
+# For self-hosted Convex, set CONVEX_SELF_HOSTED_URL to your backend URL.
 
-CONVEX_LOCAL="http://127.0.0.1:3210"
+CONVEX_LOCAL="${CONVEX_SELF_HOSTED_URL:-http://127.0.0.1:3210}"
 
-# Wait for local Convex backend
+# Wait for Convex backend to be reachable
 until curl -s "$CONVEX_LOCAL" >/dev/null 2>&1; do
   sleep 1
 done

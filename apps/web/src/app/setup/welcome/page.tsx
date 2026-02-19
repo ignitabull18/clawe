@@ -14,11 +14,18 @@ import { useSquadhubStatus } from "@/hooks/use-squadhub-status";
 const TOTAL_STEPS = 4;
 const CURRENT_STEP = 1;
 
+/** In dev (localhost), allow continuing without SquadHub so setup isn't blocked. */
+const isDevSkipSquadhub =
+  typeof window !== "undefined" &&
+  (window.location?.hostname === "localhost" ||
+    window.location?.hostname === "127.0.0.1");
+
 export default function WelcomePage() {
   const router = useRouter();
   const { status, isLoading } = useSquadhubStatus();
 
   const isOffline = !isLoading && status === "down";
+  const blockStart = isOffline && !isDevSkipSquadhub;
 
   return (
     <div className="flex flex-1 flex-col">
@@ -78,11 +85,13 @@ export default function WelcomePage() {
                   continue. Start it with:
                 </p>
                 <pre className="rounded-md bg-red-100 px-3 py-2 text-xs text-red-900 dark:bg-red-950/50 dark:text-red-300">
-                  sudo docker compose up -d squadhub
+                  docker compose up -d squadhub
                 </pre>
                 <p className="text-xs text-red-600 dark:text-red-500">
                   This status will update automatically once the service is
                   detected.
+                  {isDevSkipSquadhub &&
+                    " On localhost you can still click Get Started; some features (e.g. Telegram) will need SquadHub later."}
                 </p>
               </div>
             </div>
@@ -94,18 +103,18 @@ export default function WelcomePage() {
       <div className="flex justify-center pt-6 sm:justify-end sm:pt-8">
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className={isOffline ? "cursor-not-allowed" : ""}>
+            <span className={blockStart ? "cursor-not-allowed" : ""}>
               <Button
                 variant="brand"
                 className="w-full sm:w-auto"
-                disabled={isOffline}
+                disabled={blockStart}
                 onClick={() => router.push("/setup/business")}
               >
                 Get Started
               </Button>
             </span>
           </TooltipTrigger>
-          {isOffline && (
+          {blockStart && (
             <TooltipContent>
               <p>Start squadhub to continue</p>
             </TooltipContent>

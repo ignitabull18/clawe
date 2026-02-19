@@ -32,11 +32,20 @@ export const metadata: Metadata = {
   description: "AI-powered multi-agent coordination system.",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
+type RootLayoutProps = Readonly<{
   children: React.ReactNode;
-}>) {
+  params?: Promise<Record<string, string | string[]>>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}>;
+
+export default async function RootLayout({
+  children,
+  params,
+  searchParams,
+}: RootLayoutProps) {
+  // Next.js 15+: params/searchParams are Promises; await to avoid sync access warnings
+  if (params) await params;
+  if (searchParams) await searchParams;
   return (
     <html lang="en" suppressHydrationWarning>
       <body

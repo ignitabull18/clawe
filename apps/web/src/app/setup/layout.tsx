@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import type { ReactNode } from "react";
+import { use, type ReactNode } from "react";
 
 import { SquadhubStatus } from "@/components/squadhub-status";
 import { useRedirectIfOnboarded } from "@/hooks/use-onboarding-guard";
@@ -10,6 +10,10 @@ import {
   SetupRightPanelProvider,
   useSetupRightPanel,
 } from "./_components/setup-right-panel";
+
+const emptyParamsPromise = Promise.resolve(
+  {} as Record<string, string | string[] | undefined>,
+);
 
 // Redirects to /board if onboarding is already complete
 const OnboardingGuard = () => {
@@ -38,7 +42,20 @@ const RightPanel = () => {
   );
 };
 
-export default function SetupLayout({ children }: { children: ReactNode }) {
+type SetupLayoutProps = {
+  children: ReactNode;
+  params?: Promise<Record<string, string | string[]>>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default function SetupLayout({
+  children,
+  params,
+  searchParams,
+}: SetupLayoutProps) {
+  // Next.js 15+: unwrap Promise params/searchParams to avoid sync access warnings
+  use(params ?? emptyParamsPromise);
+  use(searchParams ?? emptyParamsPromise);
   return (
     <SetupRightPanelProvider>
       <div className="relative flex h-svh">

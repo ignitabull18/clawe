@@ -9,7 +9,12 @@ import { Button } from "@clawe/ui/components/button";
 import { Spinner } from "@clawe/ui/components/spinner";
 import { useAuth } from "@/providers/auth-provider";
 
-const AUTO_LOGIN_EMAIL = process.env.NEXT_PUBLIC_AUTO_LOGIN_EMAIL;
+// Dev auto-login: use env or fallback on localhost so we don't need Google OAuth
+const AUTO_LOGIN_EMAIL =
+  process.env.NEXT_PUBLIC_AUTO_LOGIN_EMAIL ??
+  (typeof window !== "undefined" && window.location?.hostname === "localhost"
+    ? "dev@clawe.local"
+    : undefined);
 
 export default function LoginPage() {
   const router = useRouter();

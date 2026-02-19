@@ -1,0 +1,84 @@
+{
+  "mcpServers": {
+    "supermemory": {
+      "command": "bunx",
+      "args": ["cursor-supermemory@latest", "mcp"],
+      "env": {}
+    },
+    "composio": {
+      "command": "op",
+      "args": [
+        "run",
+        "--env-file",
+        "/Users/ignitabull/Desktop/clawe/.cursor/.env.op.mcp",
+        "--",
+        "bash",
+        "-c",
+        "cd /Users/ignitabull/.cursor/mcp-servers/composio-mcp-server && uv run python -m composio_mcp_server"
+      ],
+      "env": {}
+    },
+    "coolify": {
+      "command": "op",
+      "args": [
+        "run",
+        "--env-file",
+        "/Users/ignitabull/Desktop/clawe/.cursor/.env.op.mcp",
+        "--",
+        "node",
+        "/Users/ignitabull/.cursor/mcp-servers/coolify-mcp-server/build/index.js"
+      ],
+      "env": {}
+    },
+    "hostinger": {
+      "command": "op",
+      "args": [
+        "run",
+        "--env-file",
+        "/Users/ignitabull/Desktop/clawe/.cursor/.env.op.mcp",
+        "--",
+        "node",
+        "/Users/ignitabull/.cursor/mcp-servers/hostinger-mcp-server/index.js"
+      ],
+      "env": {}
+    },
+    "devin": {
+      "command": "op",
+      "args": [
+        "run",
+        "--env-file",
+        "/Users/ignitabull/Desktop/clawe/.cursor/.env.op.mcp",
+        "--",
+        "node",
+        "/Users/ignitabull/.cursor/mcp-servers/mcpdevin/build/index.js"
+      ],
+      "env": {}
+    },
+    "resend": {
+      "command": "op",
+      "args": [
+        "run",
+        "--env-file",
+        "/Users/ignitabull/Desktop/clawe/.cursor/.env.op.mcp",
+        "--",
+        "node",
+        "/Users/ignitabull/.cursor/mcp-servers/resend-mcp-server/mcpServer.js"
+      ],
+      "env": {}
+    },
+    "twenty-crm": {
+      "command": "op",
+      "args": [
+        "run",
+        "--env-file",
+        "/Users/ignitabull/Desktop/clawe/.cursor/.env.op.mcp",
+        "--",
+        "node",
+        "/Users/ignitabull/.cursor/mcp-servers/twenty-crm-mcp-server/index.js"
+      ],
+      "env": {
+        "TWENTY_BASE_URL": "https://twenty.ignitabull.org"
+      }
+    }
+  }
+}

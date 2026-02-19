@@ -1,9 +1,15 @@
 {
   "$schema": "https://v2-7-6.turborepo.dev/schema.json",
   "ui": "tui",
-  "globalEnv": ["ENVIRONMENT", "CLAWE_EDITION"],
+  "globalEnv": [
+    "ENVIRONMENT",
+    "CLAWE_EDITION"
+  ],
   "globalPassThroughEnv": [
     "CONVEX_URL",
+    "NEXT_PUBLIC_CONVEX_URL",
+    "CONVEX_SELF_HOSTED_URL",
+    "CONVEX_SELF_HOSTED_ADMIN_KEY",
     "ANTHROPIC_API_KEY",
     "OPENAI_API_KEY",
     "SQUADHUB_URL",
@@ -14,35 +20,58 @@
     "NEXTAUTH_SECRET",
     "NEXTAUTH_URL",
     "AUTO_LOGIN_EMAIL",
+    "NEXT_PUBLIC_AUTO_LOGIN_EMAIL",
     "GOOGLE_CLIENT_ID",
     "GOOGLE_CLIENT_SECRET",
     "WATCHER_TOKEN"
   ],
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env*"
+      ],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        "dist/**"
+      ]
     },
     "lint": {
-      "dependsOn": ["^lint"]
+      "dependsOn": [
+        "^lint"
+      ]
     },
     "lint:fix": {
-      "dependsOn": ["^lint:fix"],
+      "dependsOn": [
+        "^lint:fix"
+      ],
       "cache": false
     },
     "check-types": {
-      "dependsOn": ["^build", "^check-types"]
+      "dependsOn": [
+        "^build",
+        "^check-types"
+      ]
     },
     "test": {
-      "inputs": ["$TURBO_DEFAULT$", "**/*.spec.ts", "**/*.spec.tsx"]
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "**/*.spec.ts",
+        "**/*.spec.tsx"
+      ]
     },
     "dev": {
       "cache": false,
       "persistent": true
     },
     "deploy": {
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build"
+      ],
       "cache": false
     },
     "debug": {
@@ -50,11 +79,17 @@
       "persistent": true
     },
     "openapi:export": {
-      "outputs": ["openapi.json"]
+      "outputs": [
+        "openapi.json"
+      ]
     },
     "generate": {
-      "dependsOn": ["api#openapi:export"],
-      "outputs": ["src/generated/**"]
+      "dependsOn": [
+        "api#openapi:export"
+      ],
+      "outputs": [
+        "src/generated/**"
+      ]
     }
   }
 }
