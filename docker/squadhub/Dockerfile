@@ -36,7 +36,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN npm install -g openclaw@2026.2.17
 
-RUN mkdir -p /data/config /data/workspace
+RUN mkdir -p /data/config /data/workspace && chmod -R 777 /data
 
 # Copy templates and scripts
 COPY docker/squadhub/templates/ /opt/clawe/templates/
