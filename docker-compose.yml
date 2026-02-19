@@ -16,8 +16,7 @@ services:
     volumes:
       - squadhub-data:/squadhub-data:ro
     depends_on:
-      squadhub:
-        condition: service_healthy
+      - squadhub
     restart: unless-stopped
 
   squadhub:
@@ -48,8 +47,7 @@ services:
       - CONVEX_URL=${CONVEX_URL}
       - WATCHER_TOKEN=${WATCHER_TOKEN}
     depends_on:
-      squadhub:
-        condition: service_healthy
+      - squadhub
     restart: unless-stopped
 
 volumes:
