@@ -1,26 +1,37 @@
-FROM node:22-slim
-
+FROM node:22-alpine AS base
+RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
 WORKDIR /app
 
-# Copy built artifacts from monorepo build
-# These should be built before docker build with: pnpm build
+# Install dependencies
+FROM base AS deps
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/watcher/package.json ./apps/watcher/
+COPY packages/shared/package.json ./packages/shared/
+COPY packages/backend/package.json ./packages/backend/
+COPY packages/typescript-config/package.json ./packages/typescript-config/
+RUN pnpm install --frozen-lockfile
 
-# Watcher
-COPY apps/watcher/dist/ ./dist/
+# Build
+FROM base AS builder
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/watcher/node_modules ./apps/watcher/node_modules
+COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules
+COPY --from=deps /app/packages/backend/node_modules ./packages/backend/node_modules
+COPY . .
+RUN pnpm build --filter=@clawe/watcher
 
-# Shared package (squadhub client)
-COPY packages/shared/package.json ./node_modules/@clawe/shared/package.json
-COPY packages/shared/dist/ ./node_modules/@clawe/shared/dist/
+# Runner
+FROM node:22-slim
+WORKDIR /app
 
-# Backend (Convex API types)
-COPY packages/backend/package.json ./node_modules/@clawe/backend/package.json
-COPY packages/backend/convex/_generated/ ./node_modules/@clawe/backend/convex/_generated/
-COPY packages/backend/convex/*.ts ./node_modules/@clawe/backend/convex/
+COPY --from=builder /app/apps/watcher/dist/ ./dist/
+COPY --from=builder /app/packages/shared/dist/ ./node_modules/@clawe/shared/dist/
+COPY --from=builder /app/packages/shared/package.json ./node_modules/@clawe/shared/package.json
+COPY --from=builder /app/packages/backend/convex/_generated/ ./node_modules/@clawe/backend/convex/_generated/
+COPY --from=builder /app/packages/backend/convex/*.ts ./node_modules/@clawe/backend/convex/
+COPY --from=builder /app/packages/backend/package.json ./node_modules/@clawe/backend/package.json
 
-# Create a clean package.json without workspace:* references (npm doesn't support them)
 RUN echo '{"name":"@clawe/watcher","private":true,"type":"module"}' > package.json
-
-# Install production dependencies
 RUN npm install convex axios ws moment-timezone --omit=dev
 
 ENV NODE_ENV=production
